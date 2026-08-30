@@ -12,6 +12,13 @@ make setup
 This creates `.venv`, installs the locked dependencies, and enables the
 pre-commit and pre-push hooks.
 
+`make setup` creates `.venv` but does not activate it. Project commands use
+`uv run`, so activation is optional. To activate the environment manually:
+
+```bash
+source .venv/bin/activate
+```
+
 ## Project structure
 
 ```text
