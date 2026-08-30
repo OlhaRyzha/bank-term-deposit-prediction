@@ -1,0 +1,55 @@
+# Operating systems
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Virtual environments and uv
+.venv/
+venv/
+.uv-cache/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Tests, typing, linting, and coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Logs
+*.log
+logs/
+
+# Generated model artifacts
+*.joblib
+*.pkl
+*.pickle
+models/*
+!models/.gitkeep
+
+# Generated data; keep raw source data decisions explicit
+data/processed/*
+!data/processed/.gitkeep
