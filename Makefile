@@ -1,7 +1,12 @@
 setup:
 	uv sync
+	$(MAKE) notebook-diff
 	uv run pre-commit install --hook-type pre-commit --hook-type pre-push
-	
+
+notebook-diff:
+	uv run nbdime config-git --enable
+	git config --local diff.jupyternotebook.command "uv run git-nbdiffdriver diff --ignore-outputs --ignore-metadata --ignore-id"
+
 sync:
 	uv sync
 

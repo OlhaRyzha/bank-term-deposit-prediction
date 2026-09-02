@@ -1,79 +1,70 @@
 # Bank Term Deposit Prediction
 
-Machine learning project for predicting whether a bank client will subscribe
-to a term deposit.
+Binary classification project that predicts whether a bank client will
+subscribe to a term deposit (`y = yes`). The positive class is imbalanced, and
+the call duration feature is excluded because it is unavailable before the
+call ends and would cause target leakage in a real campaign.
 
-## Setup
+## Workflow
+
+- exploratory data analysis and feature hypotheses;
+- stratified train, validation, and test split;
+- preprocessing of numeric and categorical features;
+- comparison of linear models, KNN, decision trees, XGBoost, and LightGBM;
+- imbalance experiments with class weights, SMOTENC, and SMOTE-Tomek;
+- hyperparameter tuning and model interpretation with feature importance and
+  SHAP.
+
+The complete analysis and conclusions are in
+[`notebooks/Mid_term_Project.ipynb`](notebooks/Mid_term_Project.ipynb).
+
+## Results
+
+Models were selected by validation ROC-AUC because the campaign needs a useful
+ranking of clients before choosing a decision threshold. PR-AUC, recall,
+precision, and F1 were monitored because the positive class is relatively
+rare. Accuracy was not used for model selection.
+
+The table contains the main validation results. Recall, precision, and F1 use
+the default threshold of `0.5`.
+
+| Model | ROC-AUC | PR-AUC | Recall | Precision | F1 |
+|---|---:|---:|---:|---:|---:|
+| **LightGBM + Hyperopt** | **0.8153** | 0.4613 | 0.6358 | 0.4033 | 0.4935 |
+| XGBoost + Hyperopt | 0.8135 | 0.4614 | 0.5647 | 0.4422 | **0.4960** |
+| XGBoost | 0.8093 | **0.4637** | 0.6304 | 0.3887 | 0.4809 |
+| LightGBM | 0.8062 | 0.4535 | 0.6261 | 0.3881 | 0.4792 |
+| Logistic regression (L1) | 0.8028 | 0.4483 | 0.6282 | 0.3635 | 0.4605 |
+| Logistic regression | 0.8024 | 0.4480 | 0.6293 | 0.3645 | 0.4617 |
+| Tuned decision tree | 0.7944 | 0.4236 | 0.5797 | 0.4277 | 0.4922 |
+| KNN | 0.7526 | 0.3563 | 0.2640 | 0.5396 | 0.3546 |
+
+LightGBM tuned with Hyperopt achieved the highest validation ROC-AUC and was
+selected as the final model. After retraining on the combined training and
+validation data, it produced the following results on the untouched test set:
+
+| ROC-AUC | PR-AUC | Recall | Precision | F1 |
+|---:|---:|---:|---:|---:|
+| **0.8170** | **0.4939** | **0.6509** | **0.4054** | **0.4996** |
+
+## Run the project
+
+The project requires Python 3.13 and
+[`uv`](https://docs.astral.sh/uv/).
 
 ```bash
-make setup
+make setup   # install locked dependencies and Git hooks
+make lab     # start JupyterLab
+make check   # run linting, type checking, and tests
 ```
 
-This creates `.venv`, installs the locked dependencies, and enables the
-pre-commit and pre-push hooks.
-
-`make setup` creates `.venv` but does not activate it. Project commands use
-`uv run`, so activation is optional. To activate the environment manually:
-
-```bash
-source .venv/bin/activate
-```
-
-## Project structure
+## Structure
 
 ```text
-.
-|-- data/
-|   |-- raw/          # original, immutable input data
-|   `-- processed/    # generated cleaned and transformed data
-|-- models/           # generated model artifacts
-|-- notebooks/        # exploration and experiments
-|-- reports/
-|   `-- figures/      # charts exported for reports
-|-- src/              # reusable Python code
-|   `-- bank_term_deposit_prediction/
-|       |-- data/          # loading and preprocessing
-|       |-- features/      # feature engineering
-|       |-- models/        # training and prediction
-|       |-- evaluation/    # metrics and evaluation
-|       |-- pipelines/     # end-to-end workflows
-|       `-- visualization/ # reusable plots
-|-- tests/            # pytest tests for src/
-|-- tools/            # utilities specific to this project only
-|-- Makefile
-|-- pyproject.toml
-`-- uv.lock
+data/raw/                              source dataset
+notebooks/Mid_term_Project.ipynb       EDA and model experiments
+src/bank_term_deposit_prediction/      reusable project code
+tests/                                 automated tests
+models/                                generated model artifacts
+reports/figures/                       exported charts
 ```
-
-Do not modify files in `data/raw/` from notebooks. Write transformed datasets
-to `data/processed/`. Reusable logic should move from notebooks to `src/` and
-receive a matching test in `tests/`.
-
-Keep only project-specific utilities in `tools/`. Reusable editor extensions
-and developer tools should live separately and be installed globally.
-
-## Common commands
-
-```bash
-make sync     # sync dependencies after pyproject.toml changes
-make format   # autofix lint issues and format code/notebooks
-make lint     # check lint and formatting
-make test     # run tests when tests/ contains test_*.py files
-make check    # run lint, mypy, and tests
-make hooks    # run all Git hooks manually
-```
-
-Add a runtime dependency with `uv add <package>` and a development dependency
-with `uv add --dev <package>`.
-
-## Optional VS Code notebook tool
-
-`Notebook Import Runner` is a reusable VS Code extension and should be installed
-globally rather than copied into every project. Build it into a `.vsix` from its
-own source directory, then install it with:
-
-```bash
-code --install-extension notebook-import-runner.vsix
-```
-
-After that, it is available in every VS Code project for the current user.
